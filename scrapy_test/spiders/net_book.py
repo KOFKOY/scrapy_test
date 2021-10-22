@@ -1,32 +1,51 @@
 import scrapy
+from scrapy_test.items import ScrapyTestItem
 
 
 class NetBook(scrapy.Spider):
-
+    """
+        爬取http://purepen.com 五大名著
+    """
     count = 1
-
+    book_dict = {}
     name = "netBook"  # 启动项目时要用到，必须唯一
 
     # 应该是要爬取的url
-    start_urls = ['http://purepen.com/']
+    start_urls = ['http://purepen.com']
 
-    def save_book(self, url):
-        if 'index.htm' not in url:
-            print("{} 不符合要求", url)
-            return
-
+    # start_urls = ['http://purepen.com/sgyy/index.htm']
 
     def parse(self, response, **kwargs):
         print("URL：{}", response.url)
-        self.save_book(response.url)
-        # 指定encoding 编码 并且 写入模式是w  不是wb 二进制
-        with open(f'test_book{self.count}.html', 'w', encoding="utf-8") as f:
-            f.write(response.body.decode("gbk"))
-        self.count += 1
-        other_url = response.css('table tr td p a::attr(href)').getall()
-        if other_url is not None and len(other_url) > 0:
-            for index, data in enumerate(other_url):
-                yield scrapy.Request(response.urljoin(data), callback=self.parse)
+        url = response.url
 
+        if url in self.start_urls:
+            other_url = response.css('table tr td p a::attr(href)').getall()
+            for temp_url in other_url:
+                if "index.htm" in temp_url:
+                    yield scrapy.Request(response.urljoin(temp_url), callback=self.parse)
         else:
-            print('没找到新的url')
+            dict_key = url.split('/')[-2]
+            book_name = response.css('center table tr td p font b::text').get()
+            if book_name is None:
+                if dict_key in self.book_dict.keys():
+                    book_name = self.book_dict[dict_key]
+                else:
+                    book_name = 'unknown'
+            else:
+                self.book_dict[dict_key] = book_name
+            content_url = response.css('TABLE TR TD A::attr(href)').get()
+            title = response.css('p font b::text').get()
+            if title is not None:
+                content = response.css('center table tr td pre font::text').get()
+                if content is not None:
+                    item = ScrapyTestItem()
+                    item['book_name'] = book_name
+                    item['title'] = title
+                    item['content'] = content
+                    yield item
+            if content_url is None:
+                # 取第一页
+                content_url = response.css('A::attr(href)').getall()[-1]
+            if content_url is not None:
+                yield scrapy.Request(response.urljoin(content_url), callback=self.parse)
