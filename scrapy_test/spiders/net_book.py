@@ -6,14 +6,11 @@ class NetBook(scrapy.Spider):
     """
         爬取http://purepen.com 五大名著
     """
-    count = 1
     book_dict = {}
     name = "netBook"  # 启动项目时要用到，必须唯一
 
     # 应该是要爬取的url
     start_urls = ['http://purepen.com']
-
-    # start_urls = ['http://purepen.com/sgyy/index.htm']
 
     def parse(self, response, **kwargs):
         print("URL：{}", response.url)
