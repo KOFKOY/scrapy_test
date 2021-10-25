@@ -13,10 +13,6 @@ def run_spider(name: str):
     execute(['scrapy', 'crawl', name])
 
 
-def test_function():
-    pass
-
-
 if __name__ == "__main__":
     run_spider("netBook")
 
