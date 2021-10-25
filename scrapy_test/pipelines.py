@@ -20,7 +20,7 @@ class ScrapyTestPipeline:
         content = item['content']
         with open(f"{book_name}.txt", 'a+', encoding='utf-8') as f:
             f.write(title + '\n' + content)
-        print(title)
+        # print(title)
         return item
 
     def close_spider(self, spider):
