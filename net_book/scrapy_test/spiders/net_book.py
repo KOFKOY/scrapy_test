@@ -1,5 +1,5 @@
 import scrapy
-from scrapy_test.items import ScrapyTestItem
+from net_book.scrapy_test.items import ScrapyTestItem
 
 
 class NetBook(scrapy.Spider):
