@@ -17,8 +17,8 @@ class NetBook(scrapy.Spider):
         item = ScrapyTestItem()
         item['book_name'] = self.book_dict[response.url.split('/')[-2]]
         title = response.css('p font b::text').get()
-        content = response.css('center table tr td pre font::text').get()
-        item['title'] = title
+        content = response.xpath("/html/body/center/table/tr/td/pre/font/text() | /html/body/div[1]/table/tbody/tr/td/pre/font/text()").get()
+        item['title'] = title if title is not None else ''
         item['content'] = content
         next_url = response.css('A::attr(href)').getall()[-1]
         yield item
@@ -27,9 +27,7 @@ class NetBook(scrapy.Spider):
     def parse_content(self, response):
         # 第一页的url 开始
         dict_key = response.url.split('/')[-2]
-        book_name = response.css('center table tr td p font b::text').get()
-        # http://purepen.com/jpm/index.htm
-        # 使用xpath解析 管道
+        book_name = response.xpath("/html/body/center/table[1]/tr/td/p/font/b/text() | /html/body/table/tr/td/table/tr[1]/td/table[1]/tr/td/p/b/font/text()").get()
         if book_name is None:
             return
         else:
